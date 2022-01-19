@@ -30,29 +30,28 @@ namespace Minesweeper
         public MainWindow()
         {
             InitializeComponent();
-            string[] files = Directory.GetFiles("images");
+            string[] files = Directory.GetFiles("images/tiles");
             foreach (string s in files)
             {
                 images.Add(new BitmapImage(new Uri(System.IO.Path.GetFullPath(s), UriKind.Absolute)));
             }
-            files = Directory.GetFiles("smiles");
+            files = Directory.GetFiles("images/smiles");
             foreach (string s in files)
             {
                 smiles.Add(new BitmapImage(new Uri(System.IO.Path.GetFullPath(s), UriKind.Absolute)));
             }
-            newGame();
+            NewGame();
         }
 
-        public void newGame()
+        public void NewGame()
         {
             Image image = new Image();
             image.Source = smiles[0];
             btnSmile.Content = image;
             game = new Game(20, 50);
 
-            Tuple<List<List<int>>, int> result = game.getPlayBoard();
-            List<List<int>> playBoard = result.Item1;
-            gameState = result.Item2;
+            List<List<int>> playBoard = game.GetPlayBoard();
+            gameState = game.GetGameState();
             int size = playBoard.Count;
             boardButtons = new List<List<Image>>();
             board.RowDefinitions.Clear();
@@ -84,11 +83,10 @@ namespace Minesweeper
             //drawBoard();
         }
 
-        private void drawBoard()
+        private void DrawBoard()
         {
-            Tuple<List<List<int>>, int> result = game.getPlayBoard();
-            List<List<int>> playBoard = result.Item1;
-            gameState = result.Item2;
+            List<List<int>> playBoard = game.GetPlayBoard();
+            gameState = game.GetGameState();
             int size = playBoard.Count;
 
             for (int i = 0; i < size; i++)
@@ -127,29 +125,21 @@ namespace Minesweeper
             }
         }
 
-        private void disableBoard()
-        {
-            foreach(Button b in board.Children)
-            {
-                b.IsEnabled = false;
-            }
-        }
-
         private void btn_LeftClick(object sender, EventArgs e, int i, int j)
         {
-            game.move(i, j);
-            drawBoard();
+            game.Move(i, j);
+            DrawBoard();
         }
 
         private void btn_RightClick(object sender, EventArgs e, int i, int j)
         {
-            game.flag(i, j);
-            drawBoard();
+            game.Flag(i, j);
+            DrawBoard();
         }
 
         private void btnSmile_Click(object sender, RoutedEventArgs e)
         {
-            newGame();
+            NewGame();
         }
 
         private void btnClose_Click(object sender, RoutedEventArgs e)

@@ -20,10 +20,10 @@ namespace Minesweeper.game
             this.size = size;
             this.mineCount = mineCount;
             gameState = 0;
-            newBoard();
+            NewBoard();
         }
 
-        private void newBoard()
+        private void NewBoard()
         {
             for (int i = 0; i < size; i++)
             {
@@ -39,7 +39,7 @@ namespace Minesweeper.game
             }
         }
 
-        private void calculateNeighbours()
+        private void CalculateNeighbours()
         {
             for (int i = 0; i < size; i++)
             {
@@ -72,7 +72,7 @@ namespace Minesweeper.game
             }
         }
 
-        private void layMines(int x, int y)
+        private void LayMines(int x, int y)
         {
             int currmines = mineCount;
             while (currmines > 0)
@@ -86,15 +86,20 @@ namespace Minesweeper.game
                 }
             }
 
-            calculateNeighbours();
+            CalculateNeighbours();
         }
 
-        public Tuple<List<List<int>>, int> getPlayBoard()
+        public List<List<int>> GetPlayBoard()
         {
-            return Tuple.Create(playBoard, gameState);
+            return playBoard;
         }
 
-        public void move(int x, int y)
+        public int GetGameState()
+        {
+            return gameState;
+        }
+
+        public void Move(int x, int y)
         {
             if (playBoard[x][y] == -4)
                 return;
@@ -109,11 +114,11 @@ namespace Minesweeper.game
             }
 
             if (!contains)
-                layMines(x, y);
+                LayMines(x, y);
 
             if (fullBoard[x][y] != -1)
             {
-                floodFill(x, y);
+                FloodFill(x, y);
                 int squaresLeft = 0;
                 foreach (List<int> row in playBoard)
                     foreach (int i in row)
@@ -138,7 +143,7 @@ namespace Minesweeper.game
             }
         }
 
-        private void floodFill(int x, int y)
+        private void FloodFill(int x, int y)
         {
             if (x < 0 || x > size - 1)
                 return;
@@ -149,19 +154,19 @@ namespace Minesweeper.game
             playBoard[x][y] = fullBoard[x][y];
             if (fullBoard[x][y] == 0)
             {
-                floodFill(x + 1, y);
-                floodFill(x, y + 1);
-                floodFill(x - 1, y);
-                floodFill(x, y - 1);
+                FloodFill(x + 1, y);
+                FloodFill(x, y + 1);
+                FloodFill(x - 1, y);
+                FloodFill(x, y - 1);
 
-                floodFill(x + 1, y + 1);
-                floodFill(x + 1, y - 1);
-                floodFill(x - 1, y + 1);
-                floodFill(x - 1, y - 1);
+                FloodFill(x + 1, y + 1);
+                FloodFill(x + 1, y - 1);
+                FloodFill(x - 1, y + 1);
+                FloodFill(x - 1, y - 1);
             }
         }
 
-        public void flag(int x, int y)
+        public void Flag(int x, int y)
         {
             if(playBoard[x][y] == -2)
             {
