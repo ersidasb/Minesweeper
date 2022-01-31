@@ -95,9 +95,9 @@
 
                     <Image Source="img/4.png"
                            Stretch="Fill"/>
-                    <Grid Margin="5"
-                          x:Name="topPnlGame"
-                          Visibility="Visible"
+                    <Grid x:Name="topPnlGame"
+                          Margin="5"
+                          Visibility="Collapsed"
                           Background="#b9b9b9">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="auto"/>
@@ -117,14 +117,14 @@
 
                     </Grid>
 
-                    <Grid Margin="5"
-                          x:Name="topPnlSelection"
-                          Visibility="Collapsed"
+                    <Grid x:Name="topPnlSelection"
+                          Margin="5"
+                          Visibility="Visible"
                           Background="#b9b9b9">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -133,6 +133,21 @@
 
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Center">
+                            <TextBlock Text="Board: "
+                                       VerticalAlignment="Center"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <RadioButton x:Name="rbtnRandom"
+                                         Content="Random" Checked="rbtnRandom_Checked"/>
+                                <RadioButton x:Name="rbtnCustom"
+                                         Content="Custom" Checked="rbtnImport_Checked"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    x:Name="spnlRandom"
+                                    Visibility="Visible">
                             <TextBlock Text="Difficulty: "
                                        VerticalAlignment="Center"/>
                             <ComboBox x:Name="cbxDifficulty"
@@ -140,8 +155,24 @@
                                       Height="25"/>
                         </StackPanel>
 
-
                         <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    x:Name="spnlCustom"
+                                    Visibility="Collapsed">
+                            <TextBox Text="No file selected"
+                                     VerticalAlignment="Center"
+                                     x:Name="tbxFileName"
+                                     Width="100"
+                                     Margin="0,0,5,0"
+                                     IsEnabled="False"/>
+                            <Button x:Name="btnImport"
+                                    Width="80"
+                                    Height="20"
+                                    Content="Browse..." Click="btnImport_Click"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2"
                                     Orientation="Horizontal"
                                     HorizontalAlignment="Center">
                             <TextBlock Text="Delay (ms): "
@@ -187,7 +218,6 @@
                           Background="#b9b9b9"/>
 
                 </Grid>
-
             </Grid>
         </Grid>
     </Grid>

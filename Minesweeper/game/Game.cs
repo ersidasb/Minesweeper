@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ namespace Minesweeper.game
         int size;
         int mineCount;
         int gameState;
+        string customBoardPath;
         Random rand = new Random();
         List<List<int>> fullBoard = new List<List<int>>();
         List<List<int>> playBoard = new List<List<int>>();
@@ -21,6 +23,13 @@ namespace Minesweeper.game
             this.mineCount = mineCount;
             gameState = 0;
             NewBoard();
+        }
+
+        public Game(string customBoardPath)
+        {
+            this.customBoardPath = customBoardPath;
+            gameState = 0;
+            NewBoard(customBoardPath);
         }
 
         private void NewBoard()
@@ -37,6 +46,34 @@ namespace Minesweeper.game
                 fullBoard.Add(fullRow);
                 playBoard.Add(playRow);
             }
+        }
+
+        private void NewBoard(string _customBoardPath)
+        {
+            using (StreamReader file = new StreamReader(_customBoardPath))
+            {
+                string ln;
+                mineCount = 0;
+                while ((ln = file.ReadLine()) != null)
+                {
+                    List<string> line = ln.Split(' ').ToList();
+                    List<int> fullRow = new List<int>();
+                    List<int> playRow = new List<int>();
+                    foreach (string s in line)
+                    {
+                        int tile = int.Parse(s);
+                        if (tile == -1)
+                            mineCount++;
+                        fullRow.Add(tile);
+                        playRow.Add(-2);
+                    }
+                    fullBoard.Add(fullRow);
+                    playBoard.Add(playRow);
+                }
+                file.Close();
+            }
+            size = fullBoard.Count;
+            CalculateNeighbours();
         }
 
         private void CalculateNeighbours()

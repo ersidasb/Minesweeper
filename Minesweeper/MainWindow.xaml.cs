@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using Minesweeper.game;
 using System.IO;
 using System.Threading;
+using Microsoft.Win32;
 
 namespace Minesweeper
 {
@@ -30,6 +31,7 @@ namespace Minesweeper
         Game game;
         int gameState = 0;
         Thread aiThread = new Thread(() => { });
+        string filePath = "";
         public MainWindow()
         {
             InitializeComponent();
@@ -43,12 +45,14 @@ namespace Minesweeper
             {
                 smiles.Add(new BitmapImage(new Uri(System.IO.Path.GetFullPath(s), UriKind.Absolute)));
             }
-            NewGame();
             cbxDifficulty.Items.Add("Easy");
             cbxDifficulty.Items.Add("Medium");
             cbxDifficulty.Items.Add("Hard");
             cbxDifficulty.Items.Add("Destytojas");
             cbxDifficulty.SelectedIndex = 0;
+            rbtnRandom.IsChecked = true;
+            NewGame();
+            board.IsEnabled = false;
         }
 
         public void NewGame()
@@ -56,22 +60,20 @@ namespace Minesweeper
             Image image = new Image();
             image.Source = smiles[0];
             btnSmile.Content = image;
-            if(cbxDifficulty.SelectedIndex == 0)
+
+            if (rbtnRandom.IsChecked == true)
             {
-                game = new Game(10, 11);
-            }
-            else if(cbxDifficulty.SelectedIndex == 1)
-            {
-                game = new Game(16, 50);
-            }
-            else if(cbxDifficulty.SelectedIndex == 2)
-            {
-                game = new Game(22, 99);
+                if (cbxDifficulty.SelectedIndex == 0)
+                    game = new Game(10, 11);
+                else if (cbxDifficulty.SelectedIndex == 1)
+                    game = new Game(16, 50);
+                else if (cbxDifficulty.SelectedIndex == 2)
+                    game = new Game(22, 99);
+                else
+                    game = new Game(10, -1);
             }
             else
-            {
-                game = new Game(10, -1);
-            }
+                game = new Game(filePath);
 
             playBoard = game.GetPlayBoard();
             gameState = game.GetGameState();
@@ -102,8 +104,6 @@ namespace Minesweeper
                 }
                 boardButtons.Add(buttons);
             }
-
-            //drawBoard();
         }
 
         private void DrawBoard()
@@ -233,7 +233,6 @@ namespace Minesweeper
 
         private void btnAlgorithm2_Click(object sender, RoutedEventArgs e)
         {
-
             int number = -1;
             bool success = int.TryParse(tbxDelay.Text, out number);
             if (success && number >= 0)
@@ -251,6 +250,95 @@ namespace Minesweeper
             }
             else
                 MessageBox.Show("Delay has to be a nonnegative integer");
+        }
+
+        private void rbtnRandom_Checked(object sender, RoutedEventArgs e)
+        {
+            spnlCustom.Visibility = Visibility.Collapsed;
+            spnlRandom.Visibility = Visibility.Visible;
+            btnManual.IsEnabled = true;
+            btnAlgorithm1.IsEnabled = true;
+            btnAlgorithm2.IsEnabled = true;
+        }
+
+        private void rbtnImport_Checked(object sender, RoutedEventArgs e)
+        {
+            spnlRandom.Visibility = Visibility.Collapsed;
+            spnlCustom.Visibility = Visibility.Visible;
+            if (filePath == "")
+            {
+                btnManual.IsEnabled = false;
+                btnAlgorithm1.IsEnabled = false;
+                btnAlgorithm2.IsEnabled = false;
+            }
+            else
+            {
+                btnManual.IsEnabled = true;
+                btnAlgorithm1.IsEnabled = true;
+                btnAlgorithm2.IsEnabled = true;
+            }
+        }
+
+        private void btnImport_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Filter = "TXT|*.txt";
+            if (dialog.ShowDialog() == true)
+            {
+                filePath = System.IO.Path.GetFullPath(dialog.FileName);
+                if (ValidateFile(filePath))
+                {
+                    tbxFileName.Text = System.IO.Path.GetFileName(filePath);
+                    btnManual.IsEnabled = true;
+                    btnAlgorithm1.IsEnabled = true;
+                    btnAlgorithm2.IsEnabled = true;
+                }
+                else
+                    MessageBox.Show("File is not valid");
+            }
+        }
+
+        private bool ValidateFile(string path)
+        {
+            bool valid = true;
+            using (StreamReader file = new StreamReader(path))
+            {
+                int bombs = 0;
+                int counter = 0;
+                List<int> lineLengths = new List<int>();
+                string ln;
+
+                while ((ln = file.ReadLine()) != null && valid)
+                {
+                    List<string> line = ln.Split(' ').ToList();
+                    lineLengths.Add(line.Count);
+                    foreach(string s in line)
+                    {
+                        int number = -10;
+                        bool success = int.TryParse(s, out number);
+                        if (!success || (number != -1 && number != 0))
+                        {
+                            valid = false;
+                            break;
+                        }
+                        if (number == -1)
+                            bombs++;
+                    }
+                    counter++;
+                }
+                foreach(int i in lineLengths)
+                {
+                    if(i != counter)
+                    {
+                        valid = false;
+                        break;
+                    }
+                }
+                if (bombs == 0)
+                    valid = false;
+                file.Close();
+            }
+            return valid;
         }
     }
 }
