@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Minesweeper.game;
 using System.IO;
+using System.Threading;
 
 namespace Minesweeper
 {
@@ -25,8 +26,10 @@ namespace Minesweeper
         List<BitmapImage> images = new List<BitmapImage>();
         List<BitmapImage> smiles = new List<BitmapImage>();
         List<List<Image>> boardButtons;
+        List<List<int>> playBoard = new List<List<int>>();
         Game game;
         int gameState = 0;
+        Thread aiThread = new Thread(() => { });
         public MainWindow()
         {
             InitializeComponent();
@@ -41,6 +44,11 @@ namespace Minesweeper
                 smiles.Add(new BitmapImage(new Uri(System.IO.Path.GetFullPath(s), UriKind.Absolute)));
             }
             NewGame();
+            cbxDifficulty.Items.Add("Easy");
+            cbxDifficulty.Items.Add("Medium");
+            cbxDifficulty.Items.Add("Hard");
+            cbxDifficulty.Items.Add("Destytojas");
+            cbxDifficulty.SelectedIndex = 0;
         }
 
         public void NewGame()
@@ -48,9 +56,24 @@ namespace Minesweeper
             Image image = new Image();
             image.Source = smiles[0];
             btnSmile.Content = image;
-            game = new Game(20, 50);
+            if(cbxDifficulty.SelectedIndex == 0)
+            {
+                game = new Game(10, 11);
+            }
+            else if(cbxDifficulty.SelectedIndex == 1)
+            {
+                game = new Game(16, 50);
+            }
+            else if(cbxDifficulty.SelectedIndex == 2)
+            {
+                game = new Game(22, 99);
+            }
+            else
+            {
+                game = new Game(10, -1);
+            }
 
-            List<List<int>> playBoard = game.GetPlayBoard();
+            playBoard = game.GetPlayBoard();
             gameState = game.GetGameState();
             int size = playBoard.Count;
             boardButtons = new List<List<Image>>();
@@ -115,9 +138,7 @@ namespace Minesweeper
                     {
                         if (playBoard[i][j] == -2)
                         {
-                            image = new Image();
-                            image.Source = images[0];
-                            boardButtons[i][j] = image;
+                            boardButtons[i][j].Source = images[0];
                         }
                     }
                 }
@@ -127,19 +148,28 @@ namespace Minesweeper
 
         private void btn_LeftClick(object sender, EventArgs e, int i, int j)
         {
-            game.Move(i, j);
-            DrawBoard();
+            Dispatcher.Invoke(() =>
+            {
+                game.Move(i, j);
+                DrawBoard();
+            });
         }
 
         private void btn_RightClick(object sender, EventArgs e, int i, int j)
         {
-            game.Flag(i, j);
-            DrawBoard();
+            Dispatcher.Invoke(() =>
+            {
+                game.Flag(i, j);
+                DrawBoard();
+            });
         }
 
         private void btnSmile_Click(object sender, RoutedEventArgs e)
         {
-            NewGame();
+            aiThread.Abort();
+            topPnlGame.Visibility = Visibility.Collapsed;
+            topPnlSelection.Visibility = Visibility.Visible;
+            board.IsEnabled = false;
         }
 
         private void btnClose_Click(object sender, RoutedEventArgs e)
@@ -156,6 +186,71 @@ namespace Minesweeper
         {
             if (e.ChangedButton == MouseButton.Left)
                 this.DragMove();
+        }
+
+        private void btnManual_Click(object sender, RoutedEventArgs e)
+        {
+            topPnlGame.Visibility = Visibility.Visible;
+            topPnlSelection.Visibility = Visibility.Collapsed;
+            NewGame();
+        }
+
+        private void btnAlgorithm1_Click(object sender, RoutedEventArgs e)
+        {
+            int number = -1;
+            bool success = int.TryParse(tbxDelay.Text, out number);
+            if (success && number >= 0)
+            {
+                topPnlGame.Visibility = Visibility.Visible;
+                topPnlSelection.Visibility = Visibility.Collapsed;
+                NewGame();
+                board.IsEnabled = false;
+                //Random rand = new Random();
+                aiThread = new Thread(() =>
+                {
+                    /*
+                    int size = boardButtons.Count;
+                    while (gameState == 0)
+                    {
+                        int i = rand.Next(size);
+                        int j = rand.Next(size);
+                        while (playBoard[i][j] != -2)
+                        {
+                            i = rand.Next(size);
+                            j = rand.Next(size);
+                        }
+                        btn_LeftClick(null, null, i, j);
+                        Thread.Sleep(number);
+                    }*/
+                    //ai integration
+                });
+                aiThread.IsBackground = true;
+                aiThread.Start();
+            }
+            else
+                MessageBox.Show("Delay has to be a nonnegative integer");
+        }
+
+        private void btnAlgorithm2_Click(object sender, RoutedEventArgs e)
+        {
+
+            int number = -1;
+            bool success = int.TryParse(tbxDelay.Text, out number);
+            if (success && number >= 0)
+            {
+                topPnlGame.Visibility = Visibility.Visible;
+                topPnlSelection.Visibility = Visibility.Collapsed;
+                NewGame();
+                board.IsEnabled = false;
+                aiThread = new Thread(() =>
+                {
+                    //ai integration
+                });
+                aiThread.IsBackground = true;
+                aiThread.Start();
+            }
+            else
+                MessageBox.Show("Delay has to be a nonnegative integer");
         }
     }
 }

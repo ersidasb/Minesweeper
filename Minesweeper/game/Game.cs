@@ -74,16 +74,47 @@ namespace Minesweeper.game
 
         private void LayMines(int x, int y)
         {
-            int currmines = mineCount;
-            while (currmines > 0)
+            if (mineCount > 0)
             {
-                int a = rand.Next(size);
-                int b = rand.Next(size);
-                if (fullBoard[a][b] != -1 && x != a && y != b)
+                int currmines = mineCount;
+                while (currmines > 0)
                 {
-                    fullBoard[a][b] = -1;
-                    currmines--;
+                    int a = rand.Next(size);
+                    int b = rand.Next(size);
+                    if (fullBoard[a][b] != -1 && x != a && y != b)
+                    {
+                        fullBoard[a][b] = -1;
+                        currmines--;
+                    }
                 }
+            }
+            else //destytojas difficulty
+            {
+                int placedmines = 0;
+                int top = x - 1;
+                int bot = x + 1;
+                int left = y - 1;
+                int right = y + 1;
+                if (top < 0)
+                    top = 0;
+                if (bot > size - 1)
+                    bot = size - 1;
+                if (left < 0)
+                    left = 0;
+                if (right > size - 1)
+                    right = size - 1;
+                for (int a = top; a <= bot; a++)
+                {
+                    for (int b = left; b <= right; b++)
+                    {
+                        if (a != x || b != y)
+                        {
+                            fullBoard[a][b] = -1;
+                            placedmines++;
+                        }
+                    }
+                }
+                mineCount = placedmines;
             }
 
             CalculateNeighbours();
