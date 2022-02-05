@@ -194,7 +194,6 @@ namespace Minesweeper.game
                             squaresLeft++;
                 if (squaresLeft == size*size - mineCount)
                     gameState = 1;
-                Console.WriteLine(squaresLeft);
             }
             else
             {

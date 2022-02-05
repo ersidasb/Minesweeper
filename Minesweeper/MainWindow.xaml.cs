@@ -24,6 +24,7 @@ namespace Minesweeper
     /// </summary>
     public partial class MainWindow : Window
     {
+        Random rand = new Random(Guid.NewGuid().GetHashCode());
         List<BitmapImage> images = new List<BitmapImage>();
         List<BitmapImage> smiles = new List<BitmapImage>();
         List<List<Image>> boardButtons;
@@ -108,42 +109,46 @@ namespace Minesweeper
 
         private void DrawBoard()
         {
-            List<List<int>> playBoard = game.GetPlayBoard();
-            gameState = game.GetGameState();
-            int size = playBoard.Count;
 
-            for (int i = 0; i < size; i++)
+            Dispatcher.Invoke(() =>
             {
-                for (int j = 0; j < size; j++)
-                {
-                    boardButtons[i][j].Source = images[playBoard[i][j] + 4];
-                }
-            }
+                List<List<int>> playBoard = game.GetPlayBoard();
+                gameState = game.GetGameState();
+                int size = playBoard.Count;
 
-            if (gameState == -1)
-            {
-                Image image = new Image();
-                image.Source = smiles[2];
-                btnSmile.Content = image;
-                board.IsEnabled = false;
-            }
-            else if (gameState == 1)
-            {
-                Image image = new Image();
-                image.Source = smiles[1];
-                btnSmile.Content = image;
                 for (int i = 0; i < size; i++)
                 {
                     for (int j = 0; j < size; j++)
                     {
-                        if (playBoard[i][j] == -2)
-                        {
-                            boardButtons[i][j].Source = images[0];
-                        }
+                        boardButtons[i][j].Source = images[playBoard[i][j] + 4];
                     }
                 }
-                board.IsEnabled = false;
-            }
+
+                if (gameState == -1)
+                {
+                    Image image = new Image();
+                    image.Source = smiles[2];
+                    btnSmile.Content = image;
+                    board.IsEnabled = false;
+                }
+                else if (gameState == 1)
+                {
+                    Image image = new Image();
+                    image.Source = smiles[1];
+                    btnSmile.Content = image;
+                    for (int i = 0; i < size; i++)
+                    {
+                        for (int j = 0; j < size; j++)
+                        {
+                            if (playBoard[i][j] == -2)
+                            {
+                                boardButtons[i][j].Source = images[0];
+                            }
+                        }
+                    }
+                    board.IsEnabled = false;
+                }
+            });
         }
 
         private void btn_LeftClick(object sender, EventArgs e, int i, int j)
@@ -201,6 +206,7 @@ namespace Minesweeper
             bool success = int.TryParse(tbxDelay.Text, out number);
             if (success && number >= 0)
             {
+                int delay = int.Parse(tbxDelay.Text);
                 topPnlGame.Visibility = Visibility.Visible;
                 topPnlSelection.Visibility = Visibility.Collapsed;
                 NewGame();
@@ -208,21 +214,39 @@ namespace Minesweeper
                 //Random rand = new Random();
                 aiThread = new Thread(() =>
                 {
-                    /*
-                    int size = boardButtons.Count;
-                    while (gameState == 0)
+                    Solver1 solver = new Solver1();
+                    playBoard = game.GetPlayBoard();
+
+                    Tuple<List<List<int>>, List<List<int>>> result;
+                    List<List<int>> moveSquares = new List<List<int>>();
+                    List<List<int>> flagSquares = new List<List<int>>();
+                    game.Move(rand.Next(0, playBoard.Count), rand.Next(0, playBoard.Count));
+                    DrawBoard();
+                    playBoard = game.GetPlayBoard();
+
+                    int o = 0;
+                    while (game.GetGameState()==0)
                     {
-                        int i = rand.Next(size);
-                        int j = rand.Next(size);
-                        while (playBoard[i][j] != -2)
+                        Console.WriteLine(o);
+                        o++;
+
+                        result = solver.Solve(playBoard);
+                        moveSquares = result.Item1;
+                        flagSquares = result.Item2;
+                        for(int i = 0; i < moveSquares.Count; i++)
                         {
-                            i = rand.Next(size);
-                            j = rand.Next(size);
+                            game.Move(moveSquares[i][0], moveSquares[i][1]);
+                            DrawBoard();
+                            Thread.Sleep(delay);
                         }
-                        btn_LeftClick(null, null, i, j);
-                        Thread.Sleep(number);
-                    }*/
-                    //ai integration
+                        for(int i = 0; i < flagSquares.Count; i++)
+                        {
+                            game.Flag(flagSquares[i][0], flagSquares[i][1]);
+                            DrawBoard();
+                            Thread.Sleep(delay);
+                        }
+                        playBoard = game.GetPlayBoard();
+                    }
                 });
                 aiThread.IsBackground = true;
                 aiThread.Start();

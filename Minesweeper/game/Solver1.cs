@@ -8,11 +8,19 @@ namespace Minesweeper.game
 {
     internal class Solver1
     {
-        Tuple<List<List<int>>, List<List<int>>> Solve(List<List<int>> playBoard)
+        public Tuple<List<List<int>>, List<List<int>>> Solve(List<List<int>> playBoard)
         {
             int flagCount = 0;
             int unknownCount = 0;
-
+            List<List<int>> affected = new List<List<int>>();
+            for(int i = 0; i < playBoard.Count; i++)
+            {
+                affected.Add(new List<int>());
+                for (int j = 0; j < playBoard.Count; j++)
+                {
+                    affected[i].Add(0);
+                }
+            }
             //results
             List<List<int>> clickSquares = new List<List<int>>();
             List<List<int>> flagSquares = new List<List<int>>();
@@ -28,6 +36,8 @@ namespace Minesweeper.game
                 {
                     if (playBoard[i][j] > 0)
                     {
+                        flagCount = 0;
+                        unknownCount = 0;
                         int cellValue = playBoard[i][j];
 
                         int top = i - 1;
@@ -46,9 +56,6 @@ namespace Minesweeper.game
                         {
                             for (int b = left; b <= right; b++)
                             {
-                                bool found = false;
-                                flagCount = 0;
-                                unknownCount = 0;
                                 if (playBoard[a][b] == -4)
                                 {
                                     flagCount++;
@@ -79,34 +86,37 @@ namespace Minesweeper.game
                                 {
                                     for (int b = left; b <= right; b++)
                                     {
-                                        if (playBoard[a][b] == -2)
+                                        if (playBoard[a][b] == -2 && affected[a][b] == 0)
+                                        {
                                             flagSquares.Add(new List<int>() { a, b });
+                                            affected[a][b] = 1;
+                                        }
                                     }
                                 }
                             }
                         }
                         else if (flagCount == cellValue)
                         {
-                            if (unknownCount + flagCount == cellValue)
+                            top = i - 1;
+                            bot = i + 1;
+                            left = j - 1;
+                            right = j + 1;
+                            if (top < 0)
+                                top = 0;
+                            if (bot > playBoard.Count - 1)
+                                bot = playBoard.Count - 1;
+                            if (left < 0)
+                                left = 0;
+                            if (right > playBoard.Count - 1)
+                                right = playBoard.Count - 1;
+                            for (int a = top; a <= bot; a++)
                             {
-                                top = i - 1;
-                                bot = i + 1;
-                                left = j - 1;
-                                right = j + 1;
-                                if (top < 0)
-                                    top = 0;
-                                if (bot > playBoard.Count - 1)
-                                    bot = playBoard.Count - 1;
-                                if (left < 0)
-                                    left = 0;
-                                if (right > playBoard.Count - 1)
-                                    right = playBoard.Count - 1;
-                                for (int a = top; a <= bot; a++)
+                                for (int b = left; b <= right; b++)
                                 {
-                                    for (int b = left; b <= right; b++)
+                                    if (playBoard[a][b] == -2 && affected[a][b] == 0)
                                     {
-                                        if (playBoard[a][b] == -2)
-                                            clickSquares.Add(new List<int>() { a, b });
+                                        clickSquares.Add(new List<int>() { a, b });
+                                        affected[a][b] = 1;
                                     }
                                 }
                             }
@@ -129,7 +139,8 @@ namespace Minesweeper.game
                         }
                     }
                 }
-                clickSquares.Add(candidates[rand.Next(0, candidates.Count)]);
+                int randomIndex = rand.Next(0, candidates.Count);
+                clickSquares.Add(candidates[randomIndex]);
             }
 
             return (new Tuple<List<List<int>>, List<List<int>>>(clickSquares, flagSquares));
