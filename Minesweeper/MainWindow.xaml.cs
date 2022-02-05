@@ -16,6 +16,7 @@ using Minesweeper.game;
 using System.IO;
 using System.Threading;
 using Microsoft.Win32;
+using System.Diagnostics;
 
 namespace Minesweeper
 {
@@ -24,10 +25,15 @@ namespace Minesweeper
     /// </summary>
     public partial class MainWindow : Window
     {
+        Stopwatch sw = new Stopwatch();
+
+        Image image = new Image();
+        List<Image> buttons = new List<Image>();
+
         Random rand = new Random(Guid.NewGuid().GetHashCode());
         List<BitmapImage> images = new List<BitmapImage>();
         List<BitmapImage> smiles = new List<BitmapImage>();
-        List<List<Image>> boardButtons;
+        List<List<Image>> boardButtons = new List<List<Image>>();
         List<List<int>> playBoard = new List<List<int>>();
         Game game;
         int gameState = 0;
@@ -58,9 +64,13 @@ namespace Minesweeper
 
         public void NewGame()
         {
-            Image image = new Image();
+            image = new Image();
             image.Source = smiles[0];
             btnSmile.Content = image;
+
+            //---------------------------------------------------------------------------------
+            sw = new Stopwatch();
+            sw.Start();
 
             if (rbtnRandom.IsChecked == true)
             {
@@ -76,17 +86,31 @@ namespace Minesweeper
             else
                 game = new Game(filePath);
 
+            sw.Stop();
+            Console.WriteLine("Creating new board: " + sw.ElapsedMilliseconds + "ms");
+
             playBoard = game.GetPlayBoard();
             gameState = game.GetGameState();
             int size = playBoard.Count;
+            for(int i = 0; i < boardButtons.Count; i++)
+            {
+                for(int j = 0; j < boardButtons[i].Count; j++)
+                {
+                    boardButtons[i][j].Source = null;
+                }
+            }
             boardButtons = new List<List<Image>>();
             board.RowDefinitions.Clear();
             board.ColumnDefinitions.Clear();
             board.IsEnabled = true;
 
+            //---------------------------------------------------------------------------------
+            sw = new Stopwatch();
+            sw.Start();
+
             for (int i = 0; i < size; i++)
             {
-                List<Image> buttons = new List<Image>();
+                buttons = new List<Image>();
                 board.RowDefinitions.Add(new RowDefinition());
                 board.ColumnDefinitions.Add(new ColumnDefinition());
                 for (int j = 0; j < size; j++)
@@ -105,11 +129,14 @@ namespace Minesweeper
                 }
                 boardButtons.Add(buttons);
             }
+
+            sw.Stop();
+            Console.WriteLine("Making buttons: " + sw.ElapsedMilliseconds + "ms");
+
         }
 
         private void DrawBoard()
         {
-
             Dispatcher.Invoke(() =>
             {
                 List<List<int>> playBoard = game.GetPlayBoard();
@@ -224,11 +251,8 @@ namespace Minesweeper
                     DrawBoard();
                     playBoard = game.GetPlayBoard();
 
-                    int o = 0;
                     while (game.GetGameState()==0)
                     {
-                        Console.WriteLine(o);
-                        o++;
 
                         result = solver.Solve(playBoard);
                         moveSquares = result.Item1;
