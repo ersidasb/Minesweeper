@@ -1,22 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Minesweeper.game;
 using System.IO;
 using System.Threading;
 using Microsoft.Win32;
-using System.Diagnostics;
 
 namespace Minesweeper
 {
@@ -25,7 +17,6 @@ namespace Minesweeper
     /// </summary>
     public partial class MainWindow : Window
     {
-        Stopwatch sw = new Stopwatch();
 
         Image image = new Image();
         List<Image> buttons = new List<Image>();
@@ -68,10 +59,6 @@ namespace Minesweeper
             image.Source = smiles[0];
             btnSmile.Content = image;
 
-            //---------------------------------------------------------------------------------
-            sw = new Stopwatch();
-            sw.Start();
-
             if (rbtnRandom.IsChecked == true)
             {
                 if (cbxDifficulty.SelectedIndex == 0)
@@ -86,12 +73,11 @@ namespace Minesweeper
             else
                 game = new Game(filePath);
 
-            sw.Stop();
-            Console.WriteLine("Creating new board: " + sw.ElapsedMilliseconds + "ms");
-
             playBoard = game.GetPlayBoard();
             gameState = game.GetGameState();
             int size = playBoard.Count;
+
+            //memory leakage fix
             for(int i = 0; i < boardButtons.Count; i++)
             {
                 for(int j = 0; j < boardButtons[i].Count; j++)
@@ -99,14 +85,11 @@ namespace Minesweeper
                     boardButtons[i][j].Source = null;
                 }
             }
+
             boardButtons = new List<List<Image>>();
             board.RowDefinitions.Clear();
             board.ColumnDefinitions.Clear();
             board.IsEnabled = true;
-
-            //---------------------------------------------------------------------------------
-            sw = new Stopwatch();
-            sw.Start();
 
             for (int i = 0; i < size; i++)
             {
@@ -129,10 +112,6 @@ namespace Minesweeper
                 }
                 boardButtons.Add(buttons);
             }
-
-            sw.Stop();
-            Console.WriteLine("Making buttons: " + sw.ElapsedMilliseconds + "ms");
-
         }
 
         private void DrawBoard()

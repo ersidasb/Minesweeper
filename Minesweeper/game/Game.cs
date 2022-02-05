@@ -202,7 +202,8 @@ namespace Minesweeper.game
                     for (int j = 0; j < size; j++)
                     {
                         if (fullBoard[i][j] == -1)
-                            playBoard[i][j] = fullBoard[i][j];
+                            if(playBoard[i][j] != -4)
+                                playBoard[i][j] = fullBoard[i][j];
                     }
                 }
                 gameState = -1;
