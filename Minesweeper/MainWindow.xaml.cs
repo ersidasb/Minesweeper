@@ -264,13 +264,35 @@ namespace Minesweeper
             bool success = int.TryParse(tbxDelay.Text, out number);
             if (success && number >= 0)
             {
+                int delay = int.Parse(tbxDelay.Text);
                 topPnlGame.Visibility = Visibility.Visible;
                 topPnlSelection.Visibility = Visibility.Collapsed;
                 NewGame();
                 board.IsEnabled = false;
+
+                List<List<int>> moveSquares = new List<List<int>>();
+                List<List<int>> flagSquares = new List<List<int>>();
+                DrawBoard();
+                playBoard = game.GetPlayBoard();
                 aiThread = new Thread(() =>
                 {
-                    //ai integration
+                    while(game.GetGameState() == 0)
+                    {
+                        (moveSquares, flagSquares) = Solver2.Solve(playBoard);
+                        for (int i = 0; i < moveSquares.Count; i++)
+                        {
+                            game.Move(moveSquares[i][0], moveSquares[i][1]);
+                            DrawBoard();
+                            Thread.Sleep(delay);
+                        }
+                        for (int i = 0; i < flagSquares.Count; i++)
+                        {
+                            game.Flag(flagSquares[i][0], flagSquares[i][1]);
+                            DrawBoard();
+                            Thread.Sleep(delay);
+                        }
+                        playBoard = game.GetPlayBoard();
+                    }
                 });
                 aiThread.IsBackground = true;
                 aiThread.Start();

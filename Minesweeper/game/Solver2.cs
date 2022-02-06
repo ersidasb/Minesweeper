@@ -1,4 +1,7 @@
-﻿namespace Minesweeper.game {
+﻿using System;
+using System.Collections.Generic;
+
+namespace Minesweeper.game {
     class Solver2 {
         static readonly int[] dx = { -1, 0, 1, -1, 0, 1, -1, 0, 1 };
         static readonly int[] dy = { 1, 1, 1, 0, 0, 0, -1, -1, -1 };
@@ -70,7 +73,7 @@
                 return false;
             };
 
-            if(candidates.Count() == 0) return false;
+            if(candidates.Count == 0) return false;
 
             Coordinates coord = candidates.Pop();
 
@@ -135,8 +138,8 @@
         }
 
         public static void ListToArray(List<List<int>> gameBoard, out int[,] board) {
-            int xMax = gameBoard.Count();
-            int yMax = gameBoard[0].Count();
+            int xMax = gameBoard.Count;
+            int yMax = gameBoard[0].Count;
 
             board = new int[xMax, yMax];
             for(int x = 0; x < xMax; x++) {
@@ -202,8 +205,8 @@
             var toClick = new List<List<int>>();
             var toFlag = new List<List<int>>();
             // Init
-            int xMax = gameBoard.Count();
-            int yMax = gameBoard[0].Count();
+            int xMax = gameBoard.Count;
+            int yMax = gameBoard[0].Count;
             bool[,] mines = new bool[xMax, yMax];
             int[,] board;
             ListToArray(gameBoard, out board);
@@ -249,7 +252,7 @@
                     toFlag.Add(new List<int>{c.x, c.y});
                 }
             }
-            if(toClick.Count() == 0) {
+            if(toClick.Count == 0) {
                 Coordinates safest =GetSafestOption(probability, candidates1);
                 toClick.Add(new List<int>{safest.x, safest.y});
             }
