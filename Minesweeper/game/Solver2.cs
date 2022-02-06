@@ -210,6 +210,7 @@ namespace Minesweeper.game {
             bool[,] mines = new bool[xMax, yMax];
             int[,] board;
             ListToArray(gameBoard, out board);
+            Stack<Coordinates> candidates = FindCandidates(board);
 
             for(int x = 0; x < xMax; x++) {
                 for(int y = 0; y < yMax; y++) {
@@ -232,7 +233,6 @@ namespace Minesweeper.game {
                 }
             }
             //
-            Stack<Coordinates> candidates = FindCandidates(board);
 
             if(GetOpenCount(board) < 4) {
                 Coordinates unknown =FindUnknown(board);
