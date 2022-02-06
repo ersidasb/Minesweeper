@@ -126,7 +126,7 @@ namespace Minesweeper.game {
                                 y + dy[i] >= 0 &&
                                 x + dx[i] < xMax &&
                                 y + dy[i] < yMax &&
-                                (board[x + dx[i], y + dy[i]] > 0)
+                                (board[x + dx[i], y + dy[i]] >= 0)
                                 ){
                             candidates.Push(new Coordinates(x, y));
                             break;
@@ -210,7 +210,6 @@ namespace Minesweeper.game {
             bool[,] mines = new bool[xMax, yMax];
             int[,] board;
             ListToArray(gameBoard, out board);
-            Stack<Coordinates> candidates = FindCandidates(board);
 
             for(int x = 0; x < xMax; x++) {
                 for(int y = 0; y < yMax; y++) {
@@ -233,8 +232,9 @@ namespace Minesweeper.game {
                 }
             }
             //
+            Stack<Coordinates> candidates = FindCandidates(board);
 
-            if(GetOpenCount(board) < 4) {
+            if (GetOpenCount(board) < 4) {
                 Coordinates unknown =FindUnknown(board);
                 toClick.Add(new List<int>{unknown.x, unknown.y});
                 return (toClick, toFlag);
