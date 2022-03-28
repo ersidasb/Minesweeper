@@ -276,7 +276,7 @@ namespace Minesweeper
                 playBoard = game.GetPlayBoard();
                 aiThread = new Thread(() =>
                 {
-                    while(game.GetGameState() == 0)
+                    while (game.GetGameState() == 0)
                     {
                         (moveSquares, flagSquares) = Solver2.Solve(playBoard);
                         for (int i = 0; i < moveSquares.Count; i++)
